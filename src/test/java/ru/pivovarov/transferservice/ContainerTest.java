@@ -9,7 +9,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.ResponseEntity;
 import org.testcontainers.containers.GenericContainer;
-import ru.pivovarov.transferservice.advice.ErrorResponse;
 import ru.pivovarov.transferservice.model.*;
 
 import java.util.Objects;
@@ -34,21 +33,21 @@ public class ContainerTest {
 
     @Test
     void appDoTransferTest() {
-        Transfer transfer = new Transfer(
-                new Amount(Currency.RUR, 500L),
+        TransferRq transfer = new TransferRq(
+                new Amount("RUR", 500),
                 "345",
                 "0000111122223333",
                 "12/24",
                 "0000111122224444"
         );
-        OperationResponse response = restTemplate.postForObject("http://localhost:" + prodApp.getMappedPort(5500) + "/transfer", transfer, OperationResponse.class);
+        TransferRs response = restTemplate.postForObject("http://localhost:" + prodApp.getMappedPort(5500) + "/transfer", transfer, TransferRs.class);
         Assertions.assertEquals(response.getOperationId(), 1 + "");
     }
 
     @Test
     void appValidTransferTest() {
-        Transfer transfer = new Transfer(
-                new Amount(Currency.RUR, 500L),
+        TransferRq transfer = new TransferRq(
+                new Amount("RUR", 500),
                 null,
                 "",
                 "",
@@ -60,11 +59,11 @@ public class ContainerTest {
 
     @Test
     void appConfirmOperationTest() {
-        ConfirmInfo confirmInfo = new ConfirmInfo();
-        confirmInfo.setOperationId("1");
-        confirmInfo.setCode("0000");
+        ConfirmRq confirmRq = new ConfirmRq();
+        confirmRq.setOperationId("1");
+        confirmRq.setCode("0000");
 
-        OperationResponse response = restTemplate.postForObject("http://localhost:" + prodApp.getMappedPort(5500) + "/confirmOperation", confirmInfo, OperationResponse.class);
+        ConfirmRs response = restTemplate.postForObject("http://localhost:" + prodApp.getMappedPort(5500) + "/confirmOperation", confirmRq, ConfirmRs.class);
         Assertions.assertEquals(response.getOperationId(), 1 + "");
     }
 }
