@@ -2,6 +2,7 @@ package ru.pivovarov.transferservice;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,7 +20,7 @@ class TransferServiceImplApplicationTests {
     static TransferRepository transferRepository;
 
     @BeforeAll
-    static void init() {
+    static void setUp() {
         transferRepository = new TransferRepository();
         transferServiceImpl = new TransferServiceImpl(transferRepository);
     }
@@ -37,18 +38,18 @@ class TransferServiceImplApplicationTests {
 
         String id = transferServiceImpl.doTransfer(transferRq);
 
-        Assertions.assertEquals(id, 1 + "");
+        Assertions.assertEquals(id, "1");
     }
 
     @Test
     void serviceConfirmOperationTest() {
         ConfirmRq confirmRq = Mockito.spy(ConfirmRq.class);
-        Mockito.when(confirmRq.getOperationId()).thenReturn("1");
-        Mockito.when(confirmRq.getCode()).thenReturn("0000");
+        Mockito.when(confirmRq.operationId()).thenReturn("1");
+        Mockito.when(confirmRq.code()).thenReturn("0000");
 
         ConfirmRs confirmRs = new ConfirmRs(transferServiceImpl.confirmOperation(confirmRq));
 
-        Assertions.assertEquals(confirmRs.getOperationId(), 1 + "");
+        Assertions.assertEquals(confirmRs.operationId(), "1");
     }
 
 }

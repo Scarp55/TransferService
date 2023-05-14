@@ -2,13 +2,13 @@ package ru.pivovarov.transferservice.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
-import ru.pivovarov.transferservice.exception.ErrorTransferOrConfirmException;
+import ru.pivovarov.transferservice.exception.ErrorException;
 import ru.pivovarov.transferservice.model.ConfirmRq;
 import ru.pivovarov.transferservice.model.Transfer;
 import ru.pivovarov.transferservice.model.TransferRq;
 import ru.pivovarov.transferservice.repository.TransferRepository;
+import ru.pivovarov.transferservice.validator.Validator;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -22,13 +22,17 @@ public class TransferServiceImpl implements TransferService {
 
     private final TransferRepository transferRepository;
 
+    private final Validator validator = new Validator();
+
 
     @Override
     public String doTransfer(TransferRq transferRq) {
-        Transfer transfer = new Transfer();
-        BeanUtils.copyProperties(transferRq, transfer);
-        transfer.setDate(createDate());
-        transfer.setTime(createTime());
+        validator.checkValid(transferRq);
+        Transfer transfer = new Transfer(
+                transferRq.amount(), transferRq.cardFromCVV(),
+                transferRq.cardFromNumber(), transferRq.cardFromValidTill(),
+                transferRq.cardToNumber(), createDate(), createTime()
+        );
         int transferId = transferRepository.addTransfer(transfer);
         log.info("Попытка перевода: " + transfer);
         return String.valueOf(transferId);
@@ -44,16 +48,17 @@ public class TransferServiceImpl implements TransferService {
 
     @Override
     public String confirmOperation(ConfirmRq confirmRq) {
-        Transfer transfer = transferRepository.getTransfer(confirmRq.getOperationId());
-        if (confirmRq.getCode().equals("0000")) {
+        validator.checkValid(confirmRq);
+        Transfer transfer = transferRepository.getTransfer(confirmRq.operationId());
+        if (confirmRq.code().equals("0000")) {
             if (transfer == null) {
-                throw new ErrorTransferOrConfirmException("Error confirm : " + confirmRq);
+                throw new ErrorException("Error confirm : " + confirmRq);
             }
             log.info("Перевод осуществлен: " + transfer);
         } else {
-            throw new ErrorTransferOrConfirmException("Error confirm Code : " + confirmRq);
+            throw new ErrorException("Error confirm Code : " + confirmRq);
         }
-        return confirmRq.getOperationId();
+        return confirmRq.operationId();
     }
 
 }

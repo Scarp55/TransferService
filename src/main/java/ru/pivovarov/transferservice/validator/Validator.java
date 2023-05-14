@@ -1,56 +1,68 @@
 package ru.pivovarov.transferservice.validator;
 
-import ru.pivovarov.transferservice.exception.InvalidDataException;
+import org.springframework.stereotype.Component;
+import ru.pivovarov.transferservice.exception.ErrorException;
 import ru.pivovarov.transferservice.model.ConfirmRq;
 import ru.pivovarov.transferservice.model.TransferRq;
 
+@Component
 public class Validator {
-    public static void checkValid(TransferRq transfer) {
+    public void checkValid(TransferRq transfer) {
         StringBuilder msg = new StringBuilder();
         boolean flag = true;
-        if (transfer.getCardFromCVV() == null || transfer.getCardFromCVV().length() == 0) {
+        if (transfer.cardFromCVV() == null || transfer.cardFromCVV().length() == 0) {
             msg.append("/Invalid CardFromCVV ");
             flag = false;
         }
-        if (transfer.getCardFromNumber() == null || transfer.getCardFromNumber().length() == 0) {
+        if (transfer.cardFromNumber() == null || transfer.cardFromNumber().length() == 0) {
             msg.append("/Invalid CardFromNumber ");
             flag = false;
         }
-        if (transfer.getCardFromValidTill() == null || transfer.getCardFromValidTill().length() == 0) {
+        if (transfer.cardFromValidTill() == null || transfer.cardFromValidTill().length() == 0) {
             msg.append("/Invalid CardFromValidTill ");
             flag = false;
         }
-        if (transfer.getCardToNumber() == null || transfer.getCardToNumber().length() == 0) {
+        if (transfer.cardToNumber() == null || transfer.cardToNumber().length() == 0) {
             msg.append("/Invalid CardToNumber ");
             flag = false;
         }
 
-        if (transfer.getAmount() == null || transfer.getAmount().getValue() < 0 || transfer.getAmount().getCurrency() == null) {
-            msg.append("/Invalid CardToNumber ");
+        if (transfer.amount() == null || transfer.amount().value() < 0 || transfer.amount().currency() == null) {
+            msg.append("/Invalid Amount ");
             flag = false;
         }
 
         if (!flag) {
-            throw new InvalidDataException("Invalid transfer :" + msg);
+            throw new ErrorException("Invalid transfer :" + msg);
         }
     }
 
-    public static void checkValid(ConfirmRq info) {
+    public void checkValid(ConfirmRq info) {
         StringBuilder msg = new StringBuilder();
         boolean flag = true;
 
-        if (info.getCode() == null || info.getCode().length() == 0) {
+        if (info.code() == null || info.code().length() == 0) {
             msg.append("/Invalid code");
             flag = false;
         }
 
-        if (info.getOperationId() == null || info.getOperationId().length() == 0) {
+        if (info.operationId() == null || info.operationId().length() == 0 || isNumeric(info.operationId())) {
             msg.append("/Invalid OperationId ");
             flag = false;
         }
 
         if (!flag) {
-            throw new InvalidDataException("Invalid confirm :" + msg);
+            throw new ErrorException("Invalid confirm :" + msg);
         }
+    }
+
+    private boolean isNumeric(String strNum) {
+        boolean flag = true;
+        try {
+            double d = Double.parseDouble(strNum);
+        } catch (NumberFormatException e) {
+            flag = false;
+        }
+        return flag;
     }
 }

@@ -12,8 +12,6 @@ import ru.pivovarov.transferservice.model.TransferRq;
 import ru.pivovarov.transferservice.model.TransferRs;
 import ru.pivovarov.transferservice.service.TransferServiceImpl;
 
-import static ru.pivovarov.transferservice.validator.Validator.checkValid;
-
 @RestController
 @CrossOrigin(origins = "${origins.host}")
 @RequiredArgsConstructor
@@ -22,13 +20,11 @@ public class TransferController {
 
     @PostMapping("transfer")
     public ResponseEntity<TransferRs> doTransfer(@RequestBody TransferRq transferRq) {
-        checkValid(transferRq);
         return ResponseEntity.ok(new TransferRs(transferServiceImpl.doTransfer(transferRq)));
     }
 
     @PostMapping("confirmOperation")
     public ResponseEntity<ConfirmRs> confirmOperation(@RequestBody ConfirmRq confirmRq) {
-        checkValid(confirmRq);
         return ResponseEntity.ok(new ConfirmRs(transferServiceImpl.confirmOperation(confirmRq)));
     }
 }

@@ -1,9 +1,6 @@
 package ru.pivovarov.transferservice;
 
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
@@ -41,7 +38,7 @@ public class ContainerTest {
                 "0000111122224444"
         );
         TransferRs response = restTemplate.postForObject("http://localhost:" + prodApp.getMappedPort(5500) + "/transfer", transfer, TransferRs.class);
-        Assertions.assertEquals(response.getOperationId(), 1 + "");
+        Assertions.assertEquals(response.operationId(), 1 + "");
     }
 
     @Test
@@ -54,16 +51,14 @@ public class ContainerTest {
                 ""
         );
         ResponseEntity<ErrorResponse> response = restTemplate.postForEntity("http://localhost:" + prodApp.getMappedPort(5500) + "/transfer", transfer, ErrorResponse.class);
-        Assertions.assertEquals(Objects.requireNonNull(response.getBody()).getId(), 1);
+        Assertions.assertEquals(Objects.requireNonNull(response.getBody()).message(), "");
     }
 
     @Test
     void appConfirmOperationTest() {
-        ConfirmRq confirmRq = new ConfirmRq();
-        confirmRq.setOperationId("1");
-        confirmRq.setCode("0000");
+        ConfirmRq confirmRq = new ConfirmRq("0000", "1");
 
         ConfirmRs response = restTemplate.postForObject("http://localhost:" + prodApp.getMappedPort(5500) + "/confirmOperation", confirmRq, ConfirmRs.class);
-        Assertions.assertEquals(response.getOperationId(), 1 + "");
+        Assertions.assertEquals(response.operationId(), 1 + "");
     }
 }
